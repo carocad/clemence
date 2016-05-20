@@ -1,11 +1,7 @@
 (defproject clemence "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
-  :url "http://example.com/FIXME"
-  :license {:name "Eclipse Public License"
-            :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :description "Fast and incremental Levenshtein distance"
+  :url "https://github.com/carocad/clemence"
+  :license {:name "LGPLv3"
+            :url "https://github.com/carocad/clemence/blob/master/LICENSE"}
   :dependencies [[org.clojure/clojure "1.7.0"]]
-  :profiles {:uberjar {:aot :all}
-    :dev {:dependencies [; generate test data
-                         [org.clojure/test.check "0.9.0"]
-                         ; profiler
-                         [criterium "0.4.4"]]}})
+  :profiles {:dev {:dependencies [[criterium "0.4.4"]]}}) ; profiler
