@@ -78,7 +78,7 @@
   "incrementally compute the levenshtein distance for all words inside the trie
   associated with the zp-row tuple sequence '([zipper last-row])"
   [word max-dist word-cost zp-row]
-  (if (empty? zp-row) word-cost
+  (if (empty? zp-row) (sort-by second word-cost)
     (let [nzp-row (next-depth word zp-row)
           nzp-row (remove (comp #(> % max-dist) #(apply min %) second) nzp-row)
           n-words (for [[zp crow] nzp-row
@@ -97,7 +97,7 @@
   ([word trie max-dist]
   (let [zp-root (zip-trie trie)
         first-row (range (inc (count word)))]
-    (distance word max-dist {} (list [zp-root first-row]))))
+    (distance word max-dist [] (list [zp-root first-row]))))
   ([word trie]
    (levenshtein word trie Double/POSITIVE_INFINITY)))
 
@@ -105,5 +105,8 @@
 (def foo  (build-trie dict))
 
 (with-progress-reporting
-    (quick-bench (levenshtein "canibalisn" foo 2)
+    (quick-bench (levenshtein "american" foo 2)
                  :verbose))
+
+(levenshtein "american" foo 3)
+
