@@ -3,7 +3,7 @@
             [clojure.string :as string])
   (:use [criterium.core]))
 
-;; utility functions
+;; ======================== utility functions
 (defn- zip-children
   "return a sequence of zippers with the children of loc"
   [loc]
@@ -18,7 +18,7 @@
     (when-let [right (zip/right loc)]
       (recur right letter))))
 
-;; core functions
+;; ======================== core functions
 
 (defrecord node [letter children word?])
 
