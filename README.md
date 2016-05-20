@@ -7,7 +7,7 @@ A Clojure library for fast and incremental Levenshtein distance computation by m
 Add the following to your :dependencies
 
 ```
-[clemence "0.1.0"]
+[clemence "0.1.0-SNAPSHOT"]
 ```
 
 Using clemence is very simple:
