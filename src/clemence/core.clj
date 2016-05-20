@@ -1,7 +1,6 @@
 (ns clemence.core
   (:require [clojure.zip :as zip]
-            [clojure.string :as string])
-  (:use [criterium.core]))
+            [clojure.string :as string]))
 
 ;; ======================== utility functions
 (defn- zip-children
@@ -100,13 +99,3 @@
     (distance word max-dist [] (list [zp-root first-row]))))
   ([word trie]
    (levenshtein word trie Double/POSITIVE_INFINITY)))
-
-(def dict (string/split (slurp "resources/words.txt") #"\s"))
-(def foo  (build-trie dict))
-
-(with-progress-reporting
-    (quick-bench (levenshtein "american" foo 2)
-                 :verbose))
-
-(levenshtein "american" foo 3)
-
