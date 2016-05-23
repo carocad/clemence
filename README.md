@@ -2,6 +2,10 @@
 
 A Clojure library for fast and incremental Levenshtein distance computation by means of a trie.
 
+Clemence is particularly useful for autocomplete task where a large list of words must be search in order to account for typos and to show the closest match to the user.
+
+You could also use clemence as a text search engine when searching amount a description or name database. Simply load all the descriptions/names, search for the current input and compare the obtained results with the words on the description itself. Since Clemence can take typos into account, a simple equality test is all that's needed in order to check for it.
+
 ## Usage
 
 Add the following to your :dependencies
