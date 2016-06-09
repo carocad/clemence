@@ -4,11 +4,7 @@ A Clojure library for fast and incremental Levenshtein distance computation by m
 
 ## Usage
 
-Add the following to your :dependencies
-
-```
-[clemence "0.1.0"]
-```
+[![Clojars Project](http://clojars.org/clemence/latest-version.svg)](http://clojars.org/clemence)
 
 Using clemence is very simple:
 ```Clojure
