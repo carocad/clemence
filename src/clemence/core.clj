@@ -34,6 +34,8 @@
       (empty? letters) (zip/root loc)
       (nil? nloc) (recur (zip/down (zip/insert-child loc (->node (first letters) [] word?)))
                          (rest letters))
+      (true? word?) (recur (zip/edit nloc #(assoc % :word? true))
+                           (rest letters))
       :else (recur nloc (rest letters)))))
 
 (defn build-trie
@@ -44,8 +46,8 @@
    (let [root (->node "" [] false)]
      (build-trie dictionary root)))
   ([dictionary root]
-  (if (empty? dictionary) root
-    (recur (rest dictionary) (add-word (zip-trie root) (first dictionary))))))
+   (if (empty? dictionary) root
+     (recur (rest dictionary) (add-word (zip-trie root) (first dictionary))))))
 
 (defn- next-row
   "computes the value of the next row of the distance matrix based on the
@@ -64,26 +66,57 @@
   [word zp-lastrow]
   (let [nzp-row (for [[parent last-row] zp-lastrow]
                   (for [child (zip-children parent)
-                    :let [nrow (next-row last-row (:letter (zip/node child)) word)]]
+                        :let [nrow (next-row last-row (:letter (zip/node child)) word)]]
                     (vector child nrow)))]
     (apply concat nzp-row)))
 
 (defn- build-word
   "retrieve all the letters up to the position of loc"
   [loc]
-  (string/join "" (map :letter (conj (zip/path loc) (zip/node loc)))))
+  (string/join (map :letter (conj (zip/path loc) (zip/node loc)))))
+
+(defn- prefix
+  "retrieve all the letters up to the position of loc (excluding)"
+  [loc]
+  (string/join (map :letter (zip/path loc))))
+
+
+(defn- suffixes
+  "given a trie's loc returns all suffixes that can be build from that point
+  onwards"
+  ([loc] (suffixes loc []))
+  ([loc sufxs]
+   (cond
+     (zip/end? loc) sufxs
+     (:word? (zip/node loc)) (recur (zip/next loc) (cons (build-word loc) sufxs))
+     :keep-moving (recur (zip/next loc) sufxs))))
 
 (defn- distance
   "incrementally compute the levenshtein distance for all words inside the trie
-  associated with the zp-row tuple sequence '([zipper last-row])"
+  represented by zp-row tuple sequence '([zipper last-row])"
   [word max-dist word-cost zp-row]
-  (if (empty? zp-row) (sort-by second word-cost)
+  (if (empty? zp-row) word-cost
     (let [nzp-row (next-depth word zp-row)
           nzp-row (remove (comp #(> % max-dist) #(apply min %) second) nzp-row)
           n-words (for [[zp crow] nzp-row
-                    :when (and (:word? (zip/node zp)) (> max-dist (peek crow)))]
+                        :when (and (:word? (zip/node zp)) (> max-dist (peek crow)))]
                     [(build-word zp) (peek crow)])]
       (recur word max-dist (into word-cost n-words) nzp-row))))
+
+(defn- start-distance
+  "incrementally compute the levenshtein distance for all word-sections inside
+  the trie represented by zp-row tuple sequence '([zipper last-row]).
+  Computation is performed on a depth-first search and it stops once the depth
+  equals the size of the search word"
+  [word max-dist cdepth zp-row]
+  (let [nzp-row (remove (comp #(> % max-dist) #(apply min %) second)
+                        (next-depth word zp-row))]
+    (if-not (or (empty? zp-row) (>= cdepth (count word)))
+      (recur word max-dist (inc cdepth) nzp-row)
+      (for [[zp crow] zp-row
+            suffix (suffixes (zip-trie (zip/node zp)))
+        :let [pre-word (prefix zp)]]
+        [(str pre-word suffix) (peek crow)]))))
 
 (defn levenshtein
   "Compute the levenshtein distance (a.k.a edit distance) between a word and
@@ -93,9 +126,28 @@
   Informally, the Levenshtein distance between two words is the minimum number
   of single-character edits (i.e. insertions, deletions or substitutions)
   required to change one word into the other"
-  ([word trie max-dist]
-  (let [zp-root (zip-trie trie)
-        first-row (range (inc (count word)))]
-    (distance word max-dist [] (list [zp-root first-row]))))
-  ([word trie]
-   (levenshtein word trie Double/POSITIVE_INFINITY)))
+  ([trie word]
+   (levenshtein trie word Double/POSITIVE_INFINITY))
+  ([trie word max-dist]
+   (let [zp-root    (zip-trie trie)
+         first-row  (range (inc (count word)))]
+     (->> (distance word max-dist [] (list [zp-root first-row]))
+          (sort-by second)))))
+
+(defn starts-with
+  "Compute the levenshtein distance between a word and all substrings of the
+  same length present in a dictionary of strings represented as a trie. Returns
+  a sequence of [match distance] couples of all the words starting with 'word'
+  and having a substring distance less than max-dist.
+  A maximum distance can be supplied to optimize the performance, it defaults
+  to 'infinity' i.e. no optimization"
+  ([trie word]
+   (starts-with trie word Double/POSITIVE_INFINITY))
+  ([trie word max-dist]
+   (let [zp-root    (zip-trie trie)
+         first-row  (range (inc (count word)))
+         similarity (juxt second #(count (first %)) #(compare word (first %)))]
+     (if (empty? word) (list [word 0]); the empty string would return the whole dictionary
+       (->> (start-distance word max-dist 0 (list [zp-root first-row]))
+            (sort-by similarity))))))
+
