@@ -91,7 +91,7 @@
 ;(tc/quick-check 100 equality-property)
 
 ; d(a, b) > 0 when a ≠ b, since this would require at least one operation at non-zero cost.
-(def positive-distance
+(defspec positive-distance
   100; tries
   (prop/for-all [foo   word
                  words dictionary]
