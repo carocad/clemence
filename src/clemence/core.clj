@@ -1,6 +1,5 @@
 (ns clemence.core
-  (:require [clojure.zip :as zip]
-            [clojure.string :as string]))
+  (:require [clojure.zip :as zip]))
 
 ;; ======================== utility functions
 (defn- zip-children
@@ -70,25 +69,25 @@
                     (vector child nrow)))]
     (apply concat nzp-row)))
 
-(defn- build-word
-  "retrieve all the letters up to the position of loc"
-  [loc]
-  (string/join (map :letter (conj (zip/path loc) (zip/node loc)))))
-
 (defn- prefix
   "retrieve all the letters up to the position of loc (excluding)"
   [loc]
-  (string/join (map :letter (zip/path loc))))
+  (apply str (map :letter (zip/path loc))))
 
+(defn- build-word
+  "retrieve all the letters up to the position of loc"
+  [loc]
+  (str (prefix loc) (:letter (zip/node loc))))
 
 (defn- suffixes
   "given a trie's loc returns all suffixes that can be build from that point
   onwards"
-  ([loc] (suffixes loc []))
+  ([loc]
+   (suffixes loc []))
   ([loc sufxs]
    (cond
      (zip/end? loc) sufxs
-     (:word? (zip/node loc)) (recur (zip/next loc) (cons (build-word loc) sufxs))
+     (:word? (zip/node loc)) (recur (zip/next loc) (conj sufxs (build-word loc)))
      :keep-moving (recur (zip/next loc) sufxs))))
 
 (defn- distance
@@ -114,7 +113,7 @@
     (if-not (or (empty? zp-row) (>= cdepth (count word)))
       (recur word max-dist (inc cdepth) nzp-row)
       (for [[zp crow] zp-row
-            suffix (suffixes (zip-trie (zip/node zp)))
+            suffix    (suffixes (zip-trie (zip/node zp)))
         :let [pre-word (prefix zp)]]
         [(str pre-word suffix) (peek crow)]))))
 
