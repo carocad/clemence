@@ -20,12 +20,12 @@ Using clemence is very simple:
 (def dict (string/split (slurp "resources/words.txt") #"\s"))
 
 ;; build up a trie which will be used to incrementally compute the
-;; Levenshtein distance
+;; fuzzy matching
 (def trie (clemence/build-trie dict))
 
-;; the word that you are looking for, the trie and a maximum edit distance
+;; the trie, the word that you are looking for and a maximum edit distance
 ;; to avoid looking up every single word
-(clemence/levenshtein "clemence" trie 3)
+(clemence/levenshtein trie "clemence" 3)
 ;;=> (["cement" 3] ["element" 3] ["clement" 2] ["Clement" 3] ["Clemens" 3] ["credence" 2] ["commence" 2] ["clemency" 1])
 
 
