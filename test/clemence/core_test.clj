@@ -119,6 +119,7 @@
 #_(time (sort-by (clemence/similarity "hemis") (clemence/starts-with trie "hemis" 1)))
 
 
-#_(time (take 100 (clemence/levenshtein trie "her" 2)))
+#_(time (take 100 (clemence/lcs trie "clemence" 7)))
+#_(time (take 100 (clemence/levenshtein trie "clemence" 3)))
 
 #_(time (reverse (sort-by (clemence/similarity "hemis") (clemence/lcs trie "hemis" 4))))
