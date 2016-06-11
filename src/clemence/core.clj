@@ -115,9 +115,9 @@
   [word max-dist zp-row]
   (if (empty? zp-row) nil
     (let [nzp-row (next-depth word zp-row :edit)
-          nzp-row (remove (comp #(> % max-dist) #(apply min %) second) nzp-row)
+          nzp-row (remove (comp #(>= % max-dist) #(apply min %) second) nzp-row)
           words (for [[zp crow] nzp-row
-                        :when (and (:word? (zip/node zp)) (> max-dist (peek crow)))]
+                        :when (and (:word? (zip/node zp)) (>= max-dist (peek crow)))]
                     [(build-word zp) (peek crow)])]
       (concat words (lazy-seq (edit-distance word max-dist nzp-row))))))
 
@@ -145,7 +145,7 @@
   equals the size of the search word"
   [word max-dist cdepth zp-row]
   (let [nzp-row (next-depth word zp-row :edit)
-        nzp-row (remove (comp #(> % max-dist) #(apply min %) second) nzp-row)]
+        nzp-row (remove (comp #(>= % max-dist) #(apply min %) second) nzp-row)]
     (if-not (or (empty? nzp-row) (>= cdepth (count word)))
       (recur word max-dist (inc cdepth) nzp-row)
       (for [[zp crow] zp-row
@@ -175,7 +175,7 @@
   (if (empty? zp-row) nil
     (let [nzp-row (next-depth word zp-row :lcs)
           words (for [[zp crow] nzp-row
-                        :when (and (:word? (zip/node zp)) (> (peek crow) min-length))]
+                        :when (and (:word? (zip/node zp)) (>= (peek crow) min-length))]
                     [(build-word zp) (peek crow)])]
       (concat words (lazy-seq (lcs-distance word min-length nzp-row))))))
 
