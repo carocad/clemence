@@ -66,7 +66,9 @@
 ; -------------------------------------------------------------------
 ; The results are returned best first thus the distance of successive results
 ; is always increasing
-(defspec sorted-property
+; NOTE: not anymore since I introduced lazy seq. I should consider this
+;       later on
+#_(defspec sorted-property
   100; tries
   (prop/for-all [words dictionary]
     (let [trie (clemence/build-trie words)
@@ -109,4 +111,14 @@
 #_(def dict (clojure.string/split (slurp "resources/words.txt") #"\s"))
 #_(def trie (clemence/build-trie dict))
 
-#_(crit/quick-bench (clemence/levenshtein trie "helli" 2))
+;(crit/quick-bench (clemence/levenshtein trie "helli" 2))
+
+;(crit/quick-bench (take 100 (clemence/lcs trie "hell" 3)))
+
+#_(System/gc)
+#_(time (sort-by (clemence/similarity "hemis") (clemence/starts-with trie "hemis" 1)))
+
+
+#_(time (take 100 (clemence/levenshtein trie "her" 2)))
+
+#_(time (reverse (sort-by (clemence/similarity "hemis") (clemence/lcs trie "hemis" 4))))
