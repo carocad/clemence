@@ -1,5 +1,5 @@
 (defproject clemence "0.2.0"
-  :description "Fast and incremental Levenshtein distance"
+  :description "Fast and incremental Levenshtein and Longest Common Subsequence computation"
   :url "https://github.com/carocad/clemence"
   :license {:name "LGPLv3"
             :url "https://github.com/carocad/clemence/blob/master/LICENSE"}
