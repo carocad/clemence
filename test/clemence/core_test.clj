@@ -103,23 +103,5 @@
         (= 0 (second (first foo-dist)))
         (< 0 (apply min (map second foo-dist)))))))
 
-;(tc/quick-check 100 positive-distance)
-
 ;; TODO: add random words and check that the number of words in the trie is
 ;;       equal to the number of input words
-
-#_(def dict (clojure.string/split (slurp "resources/words.txt") #"\s"))
-#_(def trie (clemence/build-trie dict))
-
-;(crit/quick-bench (clemence/levenshtein trie "helli" 2))
-
-;(crit/quick-bench (take 100 (clemence/lcs trie "hell" 3)))
-
-#_(System/gc)
-#_(time (sort-by (clemence/similarity "hemis") (clemence/starts-with trie "hemis" 1)))
-
-
-#_(time (take 100 (clemence/lcs trie "clemence" 7)))
-#_(time (take 100 (clemence/levenshtein trie "clemence" 3)))
-
-#_(time (reverse (sort-by (clemence/similarity "hemis") (clemence/lcs trie "hemis" 4))))
