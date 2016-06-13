@@ -4,91 +4,99 @@ constrained-search-eager
 constrained-search-lazy
 naive-search-eager
 naive-search-lazy
-Goal:  fuzzy search, naive --all-results
+Goal:  fuzzy search, constrained -- 10 results
 -----
 Case:  :longest-common-subsequence
-Evaluation count : 12 in 12 samples of 1 calls.
-             Execution time mean : 3,713304 sec
-    Execution time std-deviation : 16,665132 ms
-   Execution time lower quantile : 3,695729 sec ( 2,5%)
-   Execution time upper quantile : 3,740671 sec (97,5%)
-                   Overhead used : 14,680716 ns
+Evaluation count : 60 in 60 samples of 1 calls.
+             Execution time mean : 3,027140 sec
+    Execution time std-deviation : 160,301740 ms
+   Execution time lower quantile : 2,936573 sec ( 2,5%)
+   Execution time upper quantile : 3,555879 sec (97,5%)
+                   Overhead used : 14,674477 ns
+
+Found 7 outliers in 60 samples (11,6667 %)
+	low-severe	 3 (5,0000 %)
+	low-mild	 4 (6,6667 %)
+ Variance from outliers : 38,5141 % Variance is moderately inflated by outliers
 
 Case:  :levenshtein
-Evaluation count : 12 in 12 samples of 1 calls.
-             Execution time mean : 4,719247 sec
-    Execution time std-deviation : 206,480692 ms
-   Execution time lower quantile : 4,550391 sec ( 2,5%)
-   Execution time upper quantile : 5,095013 sec (97,5%)
-                   Overhead used : 14,680716 ns
+Evaluation count : 3600 in 60 samples of 60 calls.
+             Execution time mean : 29,343699 ms
+    Execution time std-deviation : 24,330747 ms
+   Execution time lower quantile : 16,735410 ms ( 2,5%)
+   Execution time upper quantile : 87,786930 ms (97,5%)
+                   Overhead used : 14,674477 ns
 
-Goal:  fuzzy search, naive -- 10 results
------
-Case:  :longest-common-subsequence
-Evaluation count : 8280 in 12 samples of 690 calls.
-             Execution time mean : 147,622137 µs
-    Execution time std-deviation : 2,658654 µs
-   Execution time lower quantile : 144,702491 µs ( 2,5%)
-   Execution time upper quantile : 152,780122 µs (97,5%)
-                   Overhead used : 14,680716 ns
-
-Found 1 outliers in 12 samples (8,3333 %)
-	low-severe	 1 (8,3333 %)
- Variance from outliers : 7,6389 % Variance is slightly inflated by outliers
-
-Case:  :levenshtein
-Evaluation count : 6492 in 12 samples of 541 calls.
-             Execution time mean : 188,395734 µs
-    Execution time std-deviation : 9,122084 µs
-   Execution time lower quantile : 181,981889 µs ( 2,5%)
-   Execution time upper quantile : 208,325057 µs (97,5%)
-                   Overhead used : 14,680716 ns
-
-Found 1 outliers in 12 samples (8,3333 %)
-	low-severe	 1 (8,3333 %)
- Variance from outliers : 15,1239 % Variance is moderately inflated by outliers
+Found 10 outliers in 60 samples (16,6667 %)
+	low-severe	 1 (1,6667 %)
+	low-mild	 9 (15,0000 %)
+ Variance from outliers : 98,2967 % Variance is severely inflated by outliers
 
 Goal:  fuzzy search, constrained --all-results
 -----
 Case:  :longest-common-subsequence
-Evaluation count : 12 in 12 samples of 1 calls.
-             Execution time mean : 3,130916 sec
-    Execution time std-deviation : 125,651325 ms
-   Execution time lower quantile : 3,043675 sec ( 2,5%)
-   Execution time upper quantile : 3,406857 sec (97,5%)
-                   Overhead used : 14,680716 ns
-
-Found 1 outliers in 12 samples (8,3333 %)
-	low-severe	 1 (8,3333 %)
- Variance from outliers : 7,7719 % Variance is slightly inflated by outliers
+Evaluation count : 60 in 60 samples of 1 calls.
+             Execution time mean : 6,719048 sec
+    Execution time std-deviation : 4,923518 sec
+   Execution time lower quantile : 3,017628 sec ( 2,5%)
+   Execution time upper quantile : 15,417511 sec (97,5%)
+                   Overhead used : 14,674477 ns
 
 Case:  :levenshtein
-Evaluation count : 72 in 12 samples of 6 calls.
-             Execution time mean : 19,944618 ms
-    Execution time std-deviation : 257,460172 µs
-   Execution time lower quantile : 19,700196 ms ( 2,5%)
-   Execution time upper quantile : 20,482929 ms (97,5%)
-                   Overhead used : 14,680716 ns
+Evaluation count : 3120 in 60 samples of 52 calls.
+             Execution time mean : 43,815465 ms
+    Execution time std-deviation : 29,131966 ms
+   Execution time lower quantile : 19,072311 ms ( 2,5%)
+   Execution time upper quantile : 92,096188 ms (97,5%)
+                   Overhead used : 14,674477 ns
 
-Found 1 outliers in 12 samples (8,3333 %)
-	low-severe	 1 (8,3333 %)
- Variance from outliers : 7,6389 % Variance is slightly inflated by outliers
-
-Goal:  fuzzy search, constrained -- 10 results
+Goal:  fuzzy search, naive --all-results
 -----
 Case:  :longest-common-subsequence
-Evaluation count : 12 in 12 samples of 1 calls.
-             Execution time mean : 3,086931 sec
-    Execution time std-deviation : 32,019767 ms
-   Execution time lower quantile : 3,042562 sec ( 2,5%)
-   Execution time upper quantile : 3,127773 sec (97,5%)
-                   Overhead used : 14,680716 ns
+Evaluation count : 60 in 60 samples of 1 calls.
+             Execution time mean : 6,343401 sec
+    Execution time std-deviation : 4,522739 sec
+   Execution time lower quantile : 3,718103 sec ( 2,5%)
+   Execution time upper quantile : 16,501515 sec (97,5%)
+                   Overhead used : 14,674477 ns
+
+Found 11 outliers in 60 samples (18,3333 %)
+	low-severe	 2 (3,3333 %)
+	low-mild	 9 (15,0000 %)
+ Variance from outliers : 98,2838 % Variance is severely inflated by outliers
 
 Case:  :levenshtein
-Evaluation count : 72 in 12 samples of 6 calls.
-             Execution time mean : 17,373508 ms
-    Execution time std-deviation : 97,431625 µs
-   Execution time lower quantile : 17,244087 ms ( 2,5%)
-   Execution time upper quantile : 17,525151 ms (97,5%)
-                   Overhead used : 14,680716 ns
+Evaluation count : 60 in 60 samples of 1 calls.
+             Execution time mean : 11,055741 sec
+    Execution time std-deviation : 7,418797 sec
+   Execution time lower quantile : 4,551626 sec ( 2,5%)
+   Execution time upper quantile : 22,622502 sec (97,5%)
+                   Overhead used : 14,674477 ns
+
+Goal:  fuzzy search, naive -- 10 results
+-----
+Case:  :longest-common-subsequence
+Evaluation count : 262680 in 60 samples of 4378 calls.
+             Execution time mean : 264,723355 µs
+    Execution time std-deviation : 158,183001 µs
+   Execution time lower quantile : 137,675926 µs ( 2,5%)
+   Execution time upper quantile : 599,163456 µs (97,5%)
+                   Overhead used : 14,674477 ns
+
+Found 9 outliers in 60 samples (15,0000 %)
+	low-severe	 9 (15,0000 %)
+ Variance from outliers : 98,2628 % Variance is severely inflated by outliers
+
+Case:  :levenshtein
+Evaluation count : 344700 in 60 samples of 5745 calls.
+             Execution time mean : 267,760091 µs
+    Execution time std-deviation : 186,668683 µs
+   Execution time lower quantile : 173,578245 µs ( 2,5%)
+   Execution time upper quantile : 763,821080 µs (97,5%)
+                   Overhead used : 14,674477 ns
+
+Found 9 outliers in 60 samples (15,0000 %)
+	low-severe	 2 (3,3333 %)
+	low-mild	 7 (11,6667 %)
+ Variance from outliers : 98,2815 % Variance is severely inflated by outliers
 
