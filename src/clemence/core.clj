@@ -1,6 +1,18 @@
 (ns clemence.core
   (:require [clojure.zip :as zip]))
 
+(comment
+  TODO, use fast-zip to improve zippers performance,
+            ;github.com/akhudek/fast-zip
+        create a levenshtein and lcs search-records to avoid passing next-type
+            to the next-depth function. Encapculation + polymorphism for the
+            future
+        replace the starts-with fuzzy function with a strict comparison one to
+            get the benefits of tries while comparing strings
+        consider putting a :data field in the node records to allow linking back
+            to a specific information that the user might want)
+
+
 ;; ======================== utility functions
 (defn- zip-children
   "return a sequence of zippers with the children of loc"
@@ -107,7 +119,20 @@
                     (vector child nrow)))]
     (apply concat nzp-row)))
 
-;; ======================== api functions
+(defn- start-distance
+  "incrementally compute the levenshtein distance for all word-sections inside
+  the trie (represented by zp-row tuple sequence '([zipper last-row])).
+  Computation is performed on a depth-first search and it stops once the depth
+  equals the size of the search word"
+  [word max-dist cdepth zp-row]
+  (let [nzp-row (next-depth word zp-row :edit)
+        nzp-row (remove (comp #(>= % max-dist) #(apply min %) second) nzp-row)]
+    (if-not (or (empty? nzp-row) (>= cdepth (count word)))
+      (recur word max-dist (inc cdepth) nzp-row)
+      (for [[zp crow] zp-row
+            suffix    (suffixes (zip-trie (zip/node zp)))
+        :let [pre-word (prefix zp)]]
+        [(str pre-word suffix) (apply min crow)]))))
 
 (defn- edit-distance
   "incrementally compute the levenshtein distance for all words inside the trie
@@ -116,10 +141,38 @@
   (if (empty? zp-row) nil
     (let [nzp-row (next-depth word zp-row :edit)
           nzp-row (remove (comp #(>= % max-dist) #(apply min %) second) nzp-row)
-          words (for [[zp crow] nzp-row
-                        :when (and (:word? (zip/node zp)) (>= max-dist (peek crow)))]
+          words   (for [[zp crow] nzp-row
+                    :when (and (:word? (zip/node zp)) (>= max-dist (peek crow)))]
                     [(build-word zp) (peek crow)])]
       (concat words (lazy-seq (edit-distance word max-dist nzp-row))))))
+
+(defn- lcs-distance
+  "incrementally compute the lcs length for all words inside the trie
+  represented by zp-row tuple sequence '([zipper last-row])"
+  [word min-length zp-row]
+  (if (empty? zp-row) nil
+    (let [nzp-row (next-depth word zp-row :lcs)
+          words   (for [[zp crow] nzp-row
+                    :when (and (:word? (zip/node zp)) (>= (peek crow) min-length))]
+                    [(build-word zp) (peek crow)])]
+      (concat words (lazy-seq (lcs-distance word min-length nzp-row))))))
+
+;; ======================== api functions
+
+(defn starts-with
+  "Compute the levenshtein distance between a word and all substrings of the
+  same length present in a dictionary of strings represented as a trie. Returns
+  a lazy sequence of [match distance] couples of all the words starting with
+  'word' and having a substring distance less than max-dist.
+  A maximum distance can be supplied to optimize the performance, it defaults
+  to 'infinity' i.e. no optimization"
+  ([trie word]
+   (starts-with trie word Double/POSITIVE_INFINITY))
+  ([trie word max-dist]
+   (let [zp-root    (zip-trie trie)
+         first-row  (range (inc (count word)))]
+     (if (empty? word) (list [word 0])
+       (start-distance word max-dist 0 (list [zp-root first-row]))))))
 
 (defn levenshtein
   "Compute the levenshtein distance (a.k.a edit distance) between a word and
@@ -137,47 +190,6 @@
    (let [zp-root    (zip-trie trie)
          first-row  (range (inc (count word)))]
      (edit-distance word max-dist (list [zp-root first-row])))))
-
-(defn- start-distance
-  "incrementally compute the levenshtein distance for all word-sections inside
-  the trie (represented by zp-row tuple sequence '([zipper last-row])).
-  Computation is performed on a depth-first search and it stops once the depth
-  equals the size of the search word"
-  [word max-dist cdepth zp-row]
-  (let [nzp-row (next-depth word zp-row :edit)
-        nzp-row (remove (comp #(>= % max-dist) #(apply min %) second) nzp-row)]
-    (if-not (or (empty? nzp-row) (>= cdepth (count word)))
-      (recur word max-dist (inc cdepth) nzp-row)
-      (for [[zp crow] zp-row
-            suffix    (suffixes (zip-trie (zip/node zp)))
-        :let [pre-word (prefix zp)]]
-        [(str pre-word suffix) (apply min crow)]))))
-
-(defn starts-with
-  "Compute the levenshtein distance between a word and all substrings of the
-  same length present in a dictionary of strings represented as a trie. Returns
-  a lazy sequence of [match distance] couples of all the words starting with
-  'word' and having a substring distance less than max-dist.
-  A maximum distance can be supplied to optimize the performance, it defaults
-  to 'infinity' i.e. no optimization"
-  ([trie word]
-   (starts-with trie word Double/POSITIVE_INFINITY))
-  ([trie word max-dist]
-   (let [zp-root    (zip-trie trie)
-         first-row  (range (inc (count word)))]
-     (if (empty? word) (list [word 0])
-       (start-distance word max-dist 0 (list [zp-root first-row]))))))
-
-(defn- lcs-distance
-  "incrementally compute the lcs length for all words inside the trie
-  represented by zp-row tuple sequence '([zipper last-row])"
-  [word min-length zp-row]
-  (if (empty? zp-row) nil
-    (let [nzp-row (next-depth word zp-row :lcs)
-          words (for [[zp crow] nzp-row
-                        :when (and (:word? (zip/node zp)) (>= (peek crow) min-length))]
-                    [(build-word zp) (peek crow)])]
-      (concat words (lazy-seq (lcs-distance word min-length nzp-row))))))
 
 (defn lcs
   "Compute the longest common subsequence length between a word and a
