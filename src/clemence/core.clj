@@ -1,9 +1,12 @@
 (ns clemence.core
-  (:require [clojure.zip :as zip]))
+  (:require [fast-zip.core :as zip]))
 
 (comment
   TODO, use fast-zip to improve zippers performance,
             ;github.com/akhudek/fast-zip
+        LCS count the levels down that are left for the lcs computation and
+            check if the minimum threshold can be accomplished, remove then
+            if not.
         create a levenshtein and lcs search-records to avoid passing next-type
             to the next-depth function. Encapculation + polymorphism for the
             future
@@ -62,7 +65,7 @@
         nloc  (some-> loc (zip/down) (loc-letter (first letters)))]
     (cond
       (empty? letters) (zip/root loc)
-      (nil? nloc) (recur (zip/down (zip/insert-child loc (->node (first letters) [] word?)))
+      (nil? nloc) (recur (zip/down (zip/insert-child loc (->node (first letters) '() word?)))
                          (rest letters))
       (true? word?) (recur (zip/edit nloc #(assoc % :word? true))
                            (rest letters))
@@ -73,7 +76,7 @@
   alternatively provide a trie to create a new one with the union of all the
   words"
   ([dictionary]
-   (let [root (->node "" [] false)]
+   (let [root (->node "" '() false)]
      (build-trie dictionary root)))
   ([dictionary root]
    (if (empty? dictionary) root
@@ -213,3 +216,4 @@
   Example: (sort-by (similarity \"foo\") (starts-with trie \"foo\"))"
   [word]
   (juxt second #(count (first %)) #(compare word (first %))))
+
