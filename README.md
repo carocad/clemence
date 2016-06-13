@@ -38,10 +38,11 @@ Using clemence is very simple:
 The Levenshtein distance and the Longest Common Subsequence are rather complementary. One tells you how much do two strings differ whereas the other tells you how much do they have in common.
 
 ### notes
-- This is blazing fast !! Implementing the Levenshtein distance with a trie and a threshold reduces the search space and allows it to incrementally calculate it instead of allocating a matrix for any 2 string (naive strategy)
-- The resources/words.txt file shown above contains around One hundred thousand words, and both levenshtein and LCS computation above with a max-dist (min-length) of 2 (resp. 7) takes less than around 5 ms on my machine.
+- The Levenshtein computation is blazing fast !! Using a trie and a threshold reduces the search space and allows it to incrementally calculate it instead of allocating a matrix for any 2 string (naive strategy). The resources/words.txt file shown above contains around One hundred thousand words (100 000), and the levenshtein computation above with a max-dist of 2 takes less than 20ms on my machine.
+- Be carefull when using the LCS computation as it is not that fast. The LCS computation *must* traverse the whole tree because there is no way to know at which point will the words start matching. To overcome this, prefer a constrained LCS computation and don't realize the complete lazy sequence returned.
 - You should be carefull when setting a threshold as its time-impact is not linear. I generally prefer a threshold of 2 but that is up to you
 - For some reasons, downloading the file with `slurp` from github seems to give be extremelly slow on my machine. If it also happens to you, simply download the file manully and read it from disk.
+- You can the results of a benchmark [here](https://raw.githubusercontent.com/carocad/clemence/master/resources/benchmark.txt)
 
 ## License
 
