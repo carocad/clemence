@@ -1,4 +1,4 @@
-(defproject clemence "0.2.1"
+(defproject clemence "0.2.2"
   :description "Fast and incremental Levenshtein and Longest Common Subsequence computation"
   :url "https://github.com/carocad/clemence"
   :license {:name "LGPLv3"
