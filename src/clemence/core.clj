@@ -45,7 +45,10 @@
       :while (< cdepth max-depth)]
       (inc (height child max-depth (inc cdepth)))))))))
 
-(defn- deep-enough? [node target] (= target (height node target)))
+(defn- deep-enough?
+  [node target]
+  (if-not (pos? target) true
+    (= target (height node target))))
 
 ;; ======================== Trie functions
 
@@ -100,10 +103,8 @@
 
 ;; ======================== String metrics functions
 
-;; LCS implementation inspired by:
-;; ICS 161: Design and Analysis of Algorithms
-;; Lecture notes for February 29, 1996
-;; https://www.ics.uci.edu/~eppstein/161/960229.html
+;; LCS implementation inspired by: ICS 161: Design and Analysis of Algorithms
+;; Lecture notes for February 29, 1996. https://www.ics.uci.edu/~eppstein/161/960229.html
 (defn- lcs-next-row
   "computes the value of the next row of an lcs distance matrix based on the
   values from the previous row"
@@ -145,7 +146,7 @@
   equals the size of the search word"
   [word max-dist cdepth zp-row]
   (let [nzp-row (next-depth word zp-row :edit)
-        nzp-row (remove (comp #(>= % max-dist) #(apply min %) second) nzp-row)]
+        nzp-row (remove (comp #(> % max-dist) #(apply min %) second) nzp-row)]
     (if-not (or (empty? nzp-row) (>= cdepth (count word)))
       (recur word max-dist (inc cdepth) nzp-row)
       (for [[zp crow] zp-row
@@ -159,7 +160,7 @@
   [word max-dist zp-row]
   (if (empty? zp-row) nil
     (let [nzp-row (next-depth word zp-row :edit)
-          nzp-row (remove (comp #(>= % max-dist) #(apply min %) second) nzp-row)
+          nzp-row (remove (comp #(> % max-dist) #(apply min %) second) nzp-row)
           words   (for [[zp crow] nzp-row
                     :when (and (:word? (zip/node zp)) (>= max-dist (peek crow)))]
                     [(build-word zp) (peek crow)])]
@@ -171,6 +172,9 @@
   [word min-length zp-row]
   (if (empty? zp-row) nil
     (let [nzp-row (next-depth word zp-row :lcs)
+          nzp-row (filter #(deep-enough? (zip/node (first %))
+                                         (- min-length (peek (second %))))
+                          nzp-row)
           words   (for [[zp crow] nzp-row
                     :when (and (:word? (zip/node zp)) (>= (peek crow) min-length))]
                     [(build-word zp) (peek crow)])]
@@ -226,10 +230,9 @@
      (lcs-distance word min-length (list [zp-root first-row])))))
 
 (defn similarity
-  "takes a word and returns a function to use with sorted-by for better results
+  "takes a word and returns a function to use with sort-by for better results
   ordering.
 
   Example: (sort-by (similarity \"foo\") (starts-with trie \"foo\"))"
   [word]
   (juxt second #(count (first %)) #(compare word (first %))))
-
