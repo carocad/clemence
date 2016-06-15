@@ -2,6 +2,8 @@
   (:require [clemence.core :as clemence])
   (:use perforate.core))
 
+(set! *warn-on-reflection* true)
+
 (def dict (clojure.string/split (slurp "resources/words.txt") #"\s"))
 (def trie (clemence/build-trie dict))
 

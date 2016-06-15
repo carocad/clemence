@@ -1,9 +1,14 @@
 (ns clemence.core
-  (:require [clojure.zip :as zip]))
+  (:require [fast-zip.core :as zip]))
+
+(set! *warn-on-reflection* true)
 
 (comment
   TODO, use fast-zip to improve zippers performance,
             ;github.com/akhudek/fast-zip
+        LCS count the levels down that are left for the lcs computation and
+            check if the minimum threshold can be accomplished, remove then
+            if not.
         create a levenshtein and lcs search-records to avoid passing next-type
             to the next-depth function. Encapculation + polymorphism for the
             future
@@ -34,7 +39,7 @@
 
 (defn- branch?  [anode] (instance? clemence.core.node anode))
 (defn- make-node [anode children] (assoc anode :children children))
-(defn- zip-trie [root] (zip/zipper branch? :children make-node root))
+(defn- zip-trie [root] (zip/zipper branch? (comp seq :children) make-node root))
 
 (defn- prefix
   "retrieve all the letters up to the position of loc (excluding)"
@@ -213,3 +218,4 @@
   Example: (sort-by (similarity \"foo\") (starts-with trie \"foo\"))"
   [word]
   (juxt second #(count (first %)) #(compare word (first %))))
+
