@@ -6,7 +6,7 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [fast-zip "0.7.0"]]
 
-  :plugins [[perforate "0.3.4"]]
+  :plugins [[jonase/eastwood "0.2.3"]]
   :profiles {:dev {:dependencies [[org.clojure/test.check "0.9.0"]
                                   [criterium "0.4.4"]]
                    :source-paths ["src/"] ;;perforate

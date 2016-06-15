@@ -4,9 +4,7 @@
 (set! *warn-on-reflection* true)
 
 (comment
-  TODO, LCS count the levels down that are left for the lcs computation and
-            check if the minimum threshold can be accomplished, remove then
-            if not.
+  TODO, modidy starts-with function to return a lazy sequence
         create a levenshtein and lcs search-records to avoid passing next-type
             to the next-depth function. Encapculation + polymorphism for the
             future
