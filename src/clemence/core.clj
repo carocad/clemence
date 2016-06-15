@@ -4,9 +4,7 @@
 (set! *warn-on-reflection* true)
 
 (comment
-  TODO, use fast-zip to improve zippers performance,
-            ;github.com/akhudek/fast-zip
-        LCS count the levels down that are left for the lcs computation and
+  TODO, LCS count the levels down that are left for the lcs computation and
             check if the minimum threshold can be accomplished, remove then
             if not.
         create a levenshtein and lcs search-records to avoid passing next-type
@@ -14,9 +12,10 @@
             future
         replace the starts-with fuzzy function with a strict comparison one to
             get the benefits of tries while comparing strings
+        create an autocomplete function which will use a strict starts-with
+            comparison and fall-back to lcs on typos
         consider putting a :data field in the node records to allow linking back
             to a specific information that the user might want)
-
 
 ;; ======================== utility functions
 (defn- zip-children
@@ -32,6 +31,21 @@
   (if (= (:letter (zip/node loc)) letter) loc
     (when-let [right (zip/right loc)]
       (recur right letter))))
+
+(defn- height
+  "look-ahead and check if node's number of children is at least max-depth.
+  Does so in a depth-first way. Returns the maximum depth reached or max-depth
+  on success"
+  ([node max-depth]
+   (height node max-depth 0))
+  ([node max-depth cdepth]
+  (if (empty? (:children node)) 0
+    (apply max (cons 0
+    (for [child (:children node)
+      :while (< cdepth max-depth)]
+      (inc (height child max-depth (inc cdepth)))))))))
+
+(defn- deep-enough? [node target] (= target (height node target)))
 
 ;; ======================== Trie functions
 
