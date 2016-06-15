@@ -1,6 +1,8 @@
 (ns clemence.core
   (:require [fast-zip.core :as zip]))
 
+(set! *warn-on-reflection* true)
+
 (comment
   TODO, use fast-zip to improve zippers performance,
             ;github.com/akhudek/fast-zip
@@ -37,7 +39,7 @@
 
 (defn- branch?  [anode] (instance? clemence.core.node anode))
 (defn- make-node [anode children] (assoc anode :children children))
-(defn- zip-trie [root] (zip/zipper branch? :children make-node root))
+(defn- zip-trie [root] (zip/zipper branch? (comp seq :children) make-node root))
 
 (defn- prefix
   "retrieve all the letters up to the position of loc (excluding)"
@@ -65,7 +67,7 @@
         nloc  (some-> loc (zip/down) (loc-letter (first letters)))]
     (cond
       (empty? letters) (zip/root loc)
-      (nil? nloc) (recur (zip/down (zip/insert-child loc (->node (first letters) '() word?)))
+      (nil? nloc) (recur (zip/down (zip/insert-child loc (->node (first letters) [] word?)))
                          (rest letters))
       (true? word?) (recur (zip/edit nloc #(assoc % :word? true))
                            (rest letters))
@@ -76,7 +78,7 @@
   alternatively provide a trie to create a new one with the union of all the
   words"
   ([dictionary]
-   (let [root (->node "" '() false)]
+   (let [root (->node "" [] false)]
      (build-trie dictionary root)))
   ([dictionary root]
    (if (empty? dictionary) root
