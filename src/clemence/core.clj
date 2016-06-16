@@ -4,15 +4,7 @@
 (set! *warn-on-reflection* true)
 
 (comment
-  TODO, modidy starts-with function to return a lazy sequence
-        create a levenshtein and lcs search-records to avoid passing next-type
-            to the next-depth function. Encapculation + polymorphism for the
-            future
-        replace the starts-with fuzzy function with a strict comparison one to
-            get the benefits of tries while comparing strings
-        create an autocomplete function which will use a strict starts-with
-            comparison and fall-back to lcs on typos
-        consider putting a :data field in the node records to allow linking back
+  TODO, consider putting a :data field in the node records to allow linking back
             to a specific information that the user might want)
 
 ;; ======================== utility functions
@@ -34,14 +26,13 @@
   "look-ahead and check if node's number of children is at least max-depth.
   Does so in a depth-first way. Returns the maximum depth reached or max-depth
   on success"
-  ([node max-depth]
-   (height node max-depth 0))
+  ([node max-depth] (height node max-depth 0))
   ([node max-depth cdepth]
-  (if (empty? (:children node)) 0
-    (apply max (cons 0
-    (for [child (:children node)
-      :while (< cdepth max-depth)]
-      (inc (height child max-depth (inc cdepth)))))))))
+   (if (empty? (:children node)) 0
+     (apply max (cons 0
+                      (for [child (:children node)
+                            :while (< cdepth max-depth)]
+                        (inc (height child max-depth (inc cdepth)))))))))
 
 (defn- deep-enough?
   [node target]
@@ -55,25 +46,6 @@
 (defn- branch?  [anode] (instance? clemence.core.node anode))
 (defn- make-node [anode children] (assoc anode :children children))
 (defn- zip-trie [root] (zip/zipper branch? (comp seq :children) make-node root))
-
-(defn- prefix
-  "retrieve all the letters up to the position of loc (excluding)"
-  [loc]
-  (apply str (map :letter (zip/path loc))))
-
-(defn- build-word
-  "retrieve all the letters up to the position of loc"
-  [loc]
-  (str (prefix loc) (:letter (zip/node loc))))
-
-(defn- suffixes
-  "given a trie's loc returns all suffixes that can be build from that point
-  onwards (breath first)"
-  [loc]
-  (for [siblings (take-while not-empty (iterate #(mapcat zip-children %) (zip-children loc)))
-        child    siblings
-    :when (:word? (zip/node child))]
-    (build-word child)))
 
 (defn- add-word
   "add a word to a trie using the loc zipper"
@@ -98,6 +70,27 @@
   ([dictionary root]
    (if (empty? dictionary) root
      (recur (rest dictionary) (add-word (zip-trie root) (first dictionary))))))
+
+;; ======================== word retrieving functions
+
+(defn- prefix
+  "retrieve all the letters up to the position of loc (excluding)"
+  [loc]
+  (apply str (map :letter (zip/path loc))))
+
+(defn- build-word
+  "retrieve all the letters up to the position of loc"
+  [loc]
+  (str (prefix loc) (:letter (zip/node loc))))
+
+(defn- suffixes
+  "given a trie's loc returns all suffixes that can be build from that point
+  onwards (breath first)"
+  [loc]
+  (for [siblings (take-while not-empty (iterate #(mapcat zip-children %) (zip-children loc)))
+        child    siblings
+    :when (:word? (zip/node child))]
+    (build-word child)))
 
 ;; ======================== String metrics functions
 
@@ -151,6 +144,19 @@
             suffix    (suffixes (zip-trie (zip/node zp)))
         :let [pre-word (prefix zp)]]
         [(str pre-word suffix) (apply min crow)]))))
+
+(defn- strict-start
+  "check letter by letter the words stored in the trie (loc) to see if
+  any of them start with 'letters'. Returns a lazy seq of words starting
+  with letters"
+  [loc letters]
+  (let [nloc (some-> loc (zip/down) (loc-letter (first letters)))]
+    (cond
+      (empty? letters) (for [suffix (suffixes (zip-trie (zip/node loc)))
+                        :let [pre-word (prefix loc)]]
+                         (str pre-word suffix))
+      (nil? nloc) nil
+      :else (recur nloc (rest letters)))))
 
 (defn- edit-distance
   "incrementally compute the levenshtein distance for all words inside the trie
@@ -234,3 +240,19 @@
   Example: (sort-by (similarity \"foo\") (starts-with trie \"foo\"))"
   [word]
   (juxt second #(count (first %)) #(compare word (first %))))
+
+(defn autocomplete
+  "takes an incomplete word (text) and search for words with a similar start
+  substring. Returns a sequence of [word dist] where dist is the text-substring
+  levenshtein distance"
+  ([trie text] (autocomplete trie text 5))
+  ([trie text max-words]
+   (let [zp-root  (zip-trie trie)
+         fresults (strict-start zp-root text)]
+     (if-not (empty? fresults) (take max-words (map #(vector % 0) fresults))
+       (loop [max-dist 1
+              words   (take max-words (starts-with trie text max-dist))]
+         (if (or (>= (count words) max-words) (>= max-dist (count text))) words
+           (recur (inc max-dist)
+              (take max-words
+                    (concat words (starts-with zp-root text (inc max-dist)))))))))))
