@@ -10,19 +10,21 @@ You could also use clemence as a text search engine when searching among a descr
 
 [![Clojars Project](http://clojars.org/clemence/latest-version.svg)](http://clojars.org/clemence)
 
-Using clemence is very simple:
+### as autocomplete tool:
 ```Clojure
 (ns example.core
   (:require [clemence.core :as clemence]))
 
-;; populate a dictionary with the words that you want to search against
-;; dict is a list of strings
-(def dict (string/split (slurp "resources/words.txt") #"\s"))
-
 ;; build up a trie which will be used to incrementally compute the
-;; fuzzy matching
-(def trie (clemence/build-trie dict))
+;; fuzzy matching. Simply pass a list of strings.
+(def trie (clemence/build-trie (string/split (slurp "resources/words.txt") #"\s")))
 
+(clemence/autocomplete trie "clem")
+;; => (["clement" 0] ["clemency" 0] ["clematis" 0] ["clemency's" 0] ["clematises" 0])
+
+```
+### raw usage
+```Clojure
 ;; the trie, the word that you are looking for and a maximum edit distance
 ;; to avoid looking up every single word
 (clemence/levenshtein trie "clemence" 3)
@@ -34,15 +36,15 @@ Using clemence is very simple:
 (clemence/lcs trie "clemence" 7)
 ;; => (["clemency" 7] ["inclemency" 7] ["clemency's" 7] ["Clemenceau" 7] ["coalescence" 7] ["inclemency's" 7] ["complemented" 7] ["convalescence" 7]  ["coalescence's" 7] ["convalescences" 7] ["convalescence's" 7])
 ```
-
 The Levenshtein distance and the Longest Common Subsequence are rather complementary. One tells you how much do two strings differ whereas the other tells you how much do they have in common.
 
 ### notes
-- The Levenshtein computation is blazing fast !! Using a trie and a threshold reduces the search space and allows it to incrementally calculate it instead of allocating a matrix for any 2 string (naive strategy). The resources/words.txt file shown above contains around One hundred thousand words (100 000), and the levenshtein computation above with a max-dist of 2 takes less than 20ms on my machine.
+- I have performed all benchmarks with 100000 words as a dictionary.
+- If no typos occur the autocomplete function returns in a couple hundred *microseconds*. Otherwise it falls back to a fuzzy match, which returns in around 10 miliseconds.
+- The Levenshtein computation is blazing fast !! Using a trie and a threshold reduces the search space and allows it to incrementally calculate it instead of allocating a matrix for any 2 string (naive strategy).
 - Be carefull when using the LCS computation as it is not that fast. The LCS computation *must* traverse the whole tree because there is no way to know at which point will the words start matching. To overcome this, prefer a constrained LCS computation and don't realize the complete lazy sequence returned.
 - You should be carefull when setting a threshold as its time-impact is not linear. I generally prefer a threshold of 2 but that is up to you
-- For some reasons, downloading the file with `slurp` from github seems to give be extremelly slow on my machine. If it also happens to you, simply download the file manully and read it from disk.
-- You can the results of a benchmark [here](https://raw.githubusercontent.com/carocad/clemence/master/resources/benchmark.txt)
+- You can the results of a benchmark [here](https://raw.githubusercontent.com/carocad/clemence/master/resources/benchmark.txt). The benchmark is performed by looking up the word 'diff' with both levenshtein and lcs.
 
 ## License
 
