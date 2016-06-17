@@ -4,8 +4,8 @@
 (set! *warn-on-reflection* true)
 
 (comment
-  TODO, consider putting a :data field in the node records to allow linking back
-            to a specific information that the user might want)
+  NOTE- consider putting a :data field in the node records to allow linking back
+          to a specific information that the user might want)
 
 ;; ======================== utility functions
 (defn- zip-children
@@ -254,5 +254,4 @@
               words   (take max-words (starts-with trie text max-dist))]
          (if (or (>= (count words) max-words) (>= max-dist (count text))) words
            (recur (inc max-dist)
-              (take max-words
-                    (concat words (starts-with zp-root text (inc max-dist)))))))))))
+              (take max-words (starts-with zp-root text (inc max-dist))))))))))
